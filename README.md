@@ -67,8 +67,12 @@ All Verilog modules and the testbench are available in the [`code/`](code/) dire
 
 RTL diagrams and a full architectural block diagram are included to illustrate the datapath, control flow, and hazard resolution logic.
 
-![RTL Schematic](images/rtl-schematics/rtl1.jpg)
-![RTL Schematic](images/rtl-schematics/rtl2.jpg)
+<p align="center">
+  <img src="images/rtl-schematics/rtl1.jpg" width="500"/>
+  <br/>
+  <img src="images/rtl-schematics/rtl2.jpg" width="500"/>
+</p>
+
 ![Block Diagram](images/block-diagram.jpg)
 
 ---

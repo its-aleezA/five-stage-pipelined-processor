@@ -1,75 +1,127 @@
-# Five-Stage Pipelined Processor (Verilog)
+# ⚙️ Pipelined RISC-V Processor with Hazard Mitigation
 
-This project implements a five-stage pipelined processor in Verilog with comprehensive hazard handling. It demonstrates instruction-level parallelism using forwarding, stalling, and hazard detection techniques across modular RTL design. The processor supports a MIPS-like instruction set and simulates real-world data and control hazards.
+A Verilog implementation of a **five-stage pipenlined RISC-V processor** featuring comprehensive hazard handling through **data forwarding and pipeline stalling**. Demonstrates practical computer architecture concepts by resolving data and control hazards in a modular, synthesizable design.
 
----
-
-## 📖 Project Overview
-
-This Verilog-based CPU project is designed to simulate a five-stage pipelined processor with support for:
-
-- Stall-only hazard handling
-- Forwarding-only hazard handling
-- Combined stall + forwarding mode
-
-It handles data and control hazards, includes a testbench, and is built with reusable modules for each pipeline stage.
+**Core Architecture**:
+- ✅ **Full 5-Stage Pipeline** (IF, ID, EX, MEM, WB) implementing instruction-level parallelism
+- ✅ **Dual Hazard Mitigation** with **forwarding** (to eliminate stalls) and **stalling** (for unavoidable hazards)
+- ✅ **Modular RTL Design** with clean separation of pipeline registers, hazard units, and datapath
+- ✅ **MIPS-like Instruction Set** support for arithmetic, memory, and control-flow operations
 
 ---
 
-## 🚀 Features
+## 📖 Overview
 
-- Full 5-stage pipeline: Fetch, Decode, Execute, Memory, Write-back
-- Implements forwarding and stalling mechanisms
-- Hazard detection and resolution units
-- Branch prediction logic (basic PCSRC control)
-- Modular RTL components
-- Instruction and data memory
-- Comprehensive simulation testbench
+This project implements an educational, yet production-grade, pipelined processor that realistically simulates the challenges and solutions of modern CPU design. Beyond basic pipelining, it focuses on **hazard resolution**—implementing both forwarding (to bypass stalled data) and pipeline stalls (for load-use hazards). The design serves as a comprehensive reference for understanding pipeline optimization, data dependency management, and control logic in hardware description languages.
 
 ---
 
-## 🔧 Technologies Used
+## 🚀 Quick Start
 
-- **Language:** Verilog
-- **Simulator:** ModelSim / Vivado / Xilinx ISim
-- **Design Units:** Modular RTL components
-- **Testbench:** Included (only for the top module)
+### 1. Prerequisites
+Ensure you have a Verilog simulator (e.g., ModelSim, Vivado, or Icarus Verilog) installed.
 
----
+### 2. Clone & Simulate
+```bash
+git clone https://github.com/yourusername/riscv-pipelined-processor.git
+cd riscv-pipelined-processor/code
 
-## 🧠 Pipeline Architecture
+# Compile top module and testbench (example for Icarus Verilog)
+iverilog -o pipeline_top_tb pipeline_top.v pipeline_top_tb.v
+vvp pipeline_top_tb
+```
 
-| Stage      | Module(s)           | Description                          |
-|------------|---------------------|--------------------------------------|
-| IF (Fetch) | `pc`, `inst_mem`    | Fetch instruction from memory        |
-| ID (Decode)| `Decoder`, `reg_file`, `IFID`, `ControlUnit` | Decode instruction, fetch operands |
-| EX         | `IDEX`, `Alu`, `AluSrc`, `ForwardingUnit`, `ForwardMux` | Execute ALU ops and forward data |
-| MEM        | `EXMEM`, `datamemory` | Access memory for lw/sw instructions |
-| WB         | `MEMWB`, `memTOregMux` | Write result back to registers      |
-
----
-
-## 📄 Project Report
-
-A full report detailing the design, simulation results, hazard handling logic, and synthesis is available:
-
-👉 [Project Report (PDF)](report/project_report.pdf)
+### 3. Configure Hazard Handling Mode
+The processor supports three hazard mitigation modes. Set the parameter in the testbench or top module:
+```verilog
+parameter HAZARD_MODE = 2; // 0: Stall-only, 1: Forward-only, 2: Combined
+```
 
 ---
 
-## 💻 Source Code
+## 🏗️ Pipeline Architecture & Hazard Resolution
 
-All Verilog modules and the testbench are available in the [`code/`](code/) directory.
+The processor implements a classic 5-stage pipeline with dedicated hazard detection and resolution units.
+
+| Stage | Module | Key Responsibility |
+| :--- | :--- | :--- |
+| **IF** (Instruction Fetch) | `pc`, `inst_mem` | Fetches next instruction, manages PC |
+| **ID** (Instruction Decode) | `Decoder`, `reg_file`, `ControlUnit` | Decodes instruction, reads registers, detects hazards |
+| **EX** (Execute) | `Alu`, `ForwardingUnit`, `ForwardMux` | Performs ALU operations, forwards data from later stages |
+| **MEM** (Memory) | `datamemory` | Accesses data memory for loads/stores |
+| **WB** (Write Back) | `memTOregMux` | Writes result back to register file |
+
+### 🔁 Hazard Handling Units
+| Component | Purpose | Key Logic |
+| :--- | :--- | :--- |
+| **Forwarding Unit** | Bypasses ALU results from EX/MEM or MEM/WB stages to EX stage inputs | Detects RAW dependencies, selects forwarded data |
+| **Hazard Detection Unit** | Inserts pipeline stalls for load-use hazards | Monitors ID stage for dependencies with previous LW instructions |
 
 ---
 
-## 📸 Diagrams
+## 📜 Supported Instruction Types
 
-RTL diagrams and a full architectural block diagram are included to illustrate the datapath, control flow, and hazard resolution logic.
+The processor supports a fundamental MIPS-like instruction set across three key formats:
 
-![RTL Schematic](images/rtl-schematics/rtl1.jpg)
-![RTL Schematic](images/rtl-schematics/rtl2.jpg)
-![Block Diagram](images/block-diagram.jpg)
+| Type | Example Instructions | Use Case |
+| :--- | :--- | :--- |
+| **R-Type** | `ADD`, `SUB`, `AND`, `OR`, `SLT` | Register-to-register arithmetic/logic |
+| **I-Type** | `LW`, `SW`, `ADDI` | Memory access and immediate operations |
+| **B-Type** | `BEQ`, `BNE` | Conditional branch control flow |
+
+---
+
+## 📊 Performance & Hazard Analysis
+
+| Hazard Mode | CPI Impact | Key Advantage | Best For |
+| :--- | :--- | :--- | :--- |
+| **Stall-Only** | Higher (more bubbles) | Simple control logic | Educational clarity |
+| **Forward-Only** | Reduced | Eliminates most stalls | Performance focus |
+| **Combined** | Optimized | Handles all hazard cases | Real-world scenarios |
+
+> The **combined mode** represents the industry-standard approach, using forwarding where possible and stalling only for unavoidable load-use hazards.
+
+---
+
+## 🗂️ Project Structure
+
+```
+/code
+├── Core Pipeline/
+│   ├── pc.v                    # Program Counter with branch logic
+│   ├── inst_mem.v              # Instruction Memory (ROM)
+│   ├── Decoder.v               # Instruction Decoder
+│   ├── reg_file.v              # 32-bit Register File
+│   ├── ControlUnit.v           # Main Control Unit
+│   ├── Alu.v                   # Arithmetic Logic Unit
+│   ├── datamemory.v            # Data Memory (RAM)
+│   └── memTOregMux.v           # Write-back Multiplexer
+├── Pipeline Registers/
+│   ├── IFID.v                  # IF/ID Pipeline Register
+│   ├── IDEX.v                  # ID/EX Pipeline Register
+│   ├── EXMEM.v                 # EX/MEM Pipeline Register
+│   └── MEMWB.v                 # MEM/WB Pipeline Register
+├── Hazard Handling/
+│   ├── ForwardingUnit.v        # Data Forwarding Logic
+│   ├── ForwardMux.v            # Forwarding Multiplexers
+│   └── HazardDetection.v       # Load-Use Stall Logic
+├── Testbench/
+│   └── pipeline_top_tb.v       # Comprehensive Testbench
+└── Documentation/
+    ├── report.pdf              # Full Project Report & Analysis
+    └── diagrams/               # RTL Schematics & Block Diagrams
+```
+
+---
+
+## 🔧 Synthesis & Implementation
+
+The design is written in synthesizable Verilog and can be targeted for:
+- **FPGA Platforms** (Tested with Xilinx Vivado)
+- **ASIC Flow** using standard cell libraries
+- **Educational Simulation** with ModelSim or Icarus Verilog
+
+The modular design allows for easy experimentation with different hazard handling strategies.
 
 ---
 
@@ -82,7 +134,11 @@ RTL diagrams and a full architectural block diagram are included to illustrate t
 
 ---
 
-## 🔖 License
+## 📜 License
 
-This project is licensed under the MIT License.  
-See the [LICENSE](LICENSE) file for full details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+> [!NOTE]
+> This project is intended for educational purposes in computer architecture, digital design, and RTL verification. It demonstrates real-world pipeline challenges and solutions.

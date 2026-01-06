@@ -106,9 +106,16 @@ The processor supports a fundamental MIPS-like instruction set across three key 
 │   ├── ForwardMux.v            # Forwarding Multiplexers
 │   └── HazardDetection.v       # Load-Use Stall Logic
 ├── Testbench/
-│   └── pipeline_top_tb.v       # Comprehensive Testbench
+│   └── MyTestBench.v           # Comprehensive Testbench
+├── AluSrc.v
+├── BranchHazard.v
+├── InteractionModule.v
+├── branchAdder.v
+├── branchCondit.v
+├── dstRegMux.vhazardrst.v
+├── mux1.v
 └── Documentation/
-    ├── report.pdf              # Full Project Report & Analysis
+    ├── project_report.pdf      # Full Project Report & Analysis
     └── diagrams/               # RTL Schematics & Block Diagrams
 ```
 

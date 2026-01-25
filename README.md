@@ -136,8 +136,6 @@ The modular design allows for easy experimentation with different hazard handlin
 
 - [Aleeza Rizwan](https://github.com/its-aleezA)
 - [Muhammad Ibrahim Abdullah](https://github.com/Ibrahim5570)
-- Aina Ajmal
-- Aameena Qadeer
 
 ---
 
